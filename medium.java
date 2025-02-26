@@ -1,55 +1,41 @@
-import java.io.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-class Student implements Serializable {
-    private int id;
-    private String name;
-    private double gpa;
+public class medium {
+    public static void main(String[] args) {
+        List<Student> students = Arrays.asList(
+            new Student("Guri", 85),
+            new Student("Murli", 95),
+            new Student("Jai", 90),
+            new Student("Sargun", 80),
+            new Student("Birla", 88)
+        );
 
-    public Student(int id, String name, double gpa) {
-        this.id = id;
-        this.name = name;
-        this.gpa = gpa;
+        List<String> filteredSortedStudents = students.stream()
+            .filter(student -> student.getMarks() > 75)
+            .sorted((s1, s2) -> Integer.compare(s2.getMarks(), s1.getMarks()))
+            .map(Student::getName)
+            .collect(Collectors.toList());
+
+        filteredSortedStudents.forEach(System.out::println);
     }
+}
 
-    public int getId() {
-        return id;
+class Student {
+    private String name;
+    private int marks;
+
+    public Student(String name, int marks) {
+        this.name = name;
+        this.marks = marks;
     }
 
     public String getName() {
         return name;
     }
 
-    public double getGpa() {
-        return gpa;
-    }
-}
-
-public class medium{
-    public static void main(String[] args) {
-        Student student = new Student(1, "John Doe", 3.5);
-        String filename = "student.ser";
-
-        // Serialize the Student object
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
-            oos.writeObject(student);
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("IOException occurred: " + e.getMessage());
-        }
-
-        // Deserialize the Student object
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
-            Student deserializedStudent = (Student) ois.readObject();
-            System.out.println("Student ID: " + deserializedStudent.getId());
-            System.out.println("Student Name: " + deserializedStudent.getName());
-            System.out.println("Student GPA: " + deserializedStudent.getGpa());
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("IOException occurred: " + e.getMessage());
-        } catch (ClassNotFoundException e) {
-            System.out.println("Class not found: " + e.getMessage());
-        }
+    public int getMarks() {
+        return marks;
     }
 }
