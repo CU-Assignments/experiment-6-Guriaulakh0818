@@ -1,90 +1,64 @@
-import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
-class Employee {
+class Product {
     String name;
-    String id;
-    String designation;
-    double salary;
+    String category;
+    double price;
 
-    Employee(String name, String id, String designation, double salary) {
+    public Product(String name, String category, double price) {
         this.name = name;
-        this.id = id;
-        this.designation = designation;
-        this.salary = salary;
+        this.category = category;
+        this.price = price;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public double getPrice() {
+        return price;
     }
 
     @Override
     public String toString() {
-        return "Name: " + name + ", ID: " + id + ", Designation: " + designation + ", Salary: " + salary;
+        return name + " (" + category + "): $" + price;
     }
 }
 
 public class hard {
-    private static final String FILE_NAME = "employees.txt";
-    private static List<Employee> employees = new ArrayList<>();
-
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        int choice;
+        List<Product> products = Arrays.asList(
+            new Product("Laptop", "Electronics", 1200.00),
+            new Product("Smartphone", "Electronics", 800.00),
+            new Product("Tablet", "Electronics", 400.00),
+            new Product("Chair", "Furniture", 150.00),
+            new Product("Table", "Furniture", 300.00),
+            new Product("Sofa", "Furniture", 700.00)
+        );
 
-        do {
-            System.out.println("Menu:");
-            System.out.println("1. Add an Employee");
-            System.out.println("2. Display All");
-            System.out.println("3. Exit");
-            System.out.print("Enter your choice: ");
-            choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+        // Grouping products by category
+        Map<String, List<Product>> groupedByCategory = products.stream()
+            .collect(Collectors.groupingBy(Product::getCategory));
 
-            switch (choice) {
-                case 1:
-                    addEmployee(scanner);
-                    break;
-                case 2:
-                    displayEmployees();
-                    break;
-                case 3:
-                    System.out.println("Exiting...");
-                    break;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-        } while (choice != 3);
-        scanner.close();
-    }
+        // Finding the most expensive product in each category
+        Map<String, Product> mostExpensiveProduct = groupedByCategory.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().stream()
+                    .max(Comparator.comparing(Product::getPrice))
+                    .orElse(null)
+            ));
 
-    private static void addEmployee(Scanner scanner) {
-        System.out.print("Enter Employee Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter Employee ID: ");
-        String id = scanner.nextLine();
-        System.out.print("Enter Designation: ");
-        String designation = scanner.nextLine();
-        System.out.print("Enter Salary: ");
-        double salary = scanner.nextDouble();
+        // Calculating the average price of all products
+        double averagePrice = products.stream()
+            .collect(Collectors.averagingDouble(Product::getPrice));
 
-        Employee employee = new Employee(name, id, designation, salary);
-        employees.add(employee);
-        saveToFile(employee);
-    }
+        // Output results
+        System.out.println("Most Expensive Products by Category:");
+        mostExpensiveProduct.forEach((category, product) -> 
+            System.out.println(category + ": " + product));
 
-    private static void saveToFile(Employee employee) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true))) {
-            writer.write(employee.toString());
-            writer.newLine();
-        } catch (IOException e) {
-            System.out.println("An error occurred while saving the employee data.");
-        }
-    }
-
-    private static void displayEmployees() {
-        if (employees.isEmpty()) {
-            System.out.println("No employees to display.");
-            return;
-        }
-        for (Employee employee : employees) {
-            System.out.println(employee);
-        }
+        System.out.println("\nAverage Price of All Products: $" + averagePrice);
     }
 }
